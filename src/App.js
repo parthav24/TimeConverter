@@ -294,7 +294,9 @@ function App() {
                     filteredTimeZones.map((tz) => (
                       <li
                         key={tz}
-                        className={`p-2 hover:bg-blue-100 cursor-pointer ${
+                        className={`p-2 ${
+                          darkMode ? "hover:bg-gray-600" : "hover:bg-blue-200"
+                        } cursor-pointer ${
                           selectedTimeZones.some((item) => item.tz === tz)
                             ? "text-gray-400 cursor-not-allowed"
                             : ""
@@ -308,7 +310,7 @@ function App() {
                       </li>
                     ))
                   ) : (
-                    <li className="p-2 text-gray-500">No results found</li>
+                    <li className="p-2 text-gray-200">No results found</li>
                   )}
                 </ul>
               )}
@@ -556,7 +558,7 @@ function App() {
                         </Draggable>
                       ))
                     ) : (
-                      <p className="text-gray-500">No timezones selected</p>
+                      <p className={`${darkMode?"text-gray-400":"text-gray-600"}`}>No timezones selected</p>
                     )}
                     {provided.placeholder}
                   </div>
