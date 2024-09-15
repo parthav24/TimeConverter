@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SlCalender } from "react-icons/sl";
-import { PiArrowsDownUpBold } from "react-icons/pi";
 import { LuLink } from "react-icons/lu";
-import { MdNightlight } from "react-icons/md";
+import { MdDarkMode } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import moment from "moment-timezone";
+import { RiArrowUpDownFill, RiCalendarScheduleFill } from "react-icons/ri";
 
 function App() {
   const timeZones = moment.tz.names();
@@ -19,11 +18,25 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(
     moment().format("YYYY-MM-DD")
   );
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [isAscending, setIsAscending] = useState(true);
+  const dropdownRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownVisible]);
 
   useEffect(() => {
     // Update the URL whenever the selectedTimeZones changes
@@ -227,14 +240,15 @@ function App() {
 
   const handleLuLinkClick = () => {
     const currentUrl = window.location.origin + location.pathname;
-    
+
     // Copy the URL to the clipboard
-    navigator.clipboard.writeText(currentUrl)
+    navigator.clipboard
+      .writeText(currentUrl)
       .then(() => {
-        alert('URL copied to clipboard: ' + currentUrl);
+        alert("URL copied to clipboard: " + currentUrl);
       })
-      .catch(err => {
-        console.error('Could not copy text: ', err);
+      .catch((err) => {
+        console.error("Could not copy text: ", err);
       });
   };
 
@@ -250,26 +264,29 @@ function App() {
         <div
           className={`${
             darkMode ? "bg-gray-700" : "bg-blue-300"
-          } h-[500px] w-[700px] rounded-2xl shadow-2xl`}
+          } h-[500px] w-[700px] rounded-lg shadow-2xl`}
         >
           <div
             className={`${
               darkMode ? "bg-gray-600" : "bg-blue-500"
-            } h-1/6 w-full rounded-t-2xl p-5 flex items-center justify-between gap-2`}
+            } h-1/6 w-full rounded-t-lg p-5 flex items-center justify-between gap-2`}
           >
-            <div className="bg-white h-full w-full rounded-lg">
+            <div
+              className="bg-white h-full w-full rounded-lg"
+              ref={dropdownRef}
+            >
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearch}
                 placeholder="Search timezone"
-                className={`h-full w-full rounded-lg focus:outline-none px-2 ${
+                className={`h-full w-full rounded-md focus:outline-none px-3 ${
                   darkMode ? "bg-gray-500 text-white" : ""
                 }`}
               />
               {isDropdownVisible && (
                 <ul
-                  className={`relative w-full shadow-lg rounded-lg z-10 ${
+                  className={`relative mt-1 w-full shadow-lg rounded-lg z-10 ${
                     darkMode ? "bg-gray-500 text-white" : "bg-white"
                   }`}
                 >
@@ -302,18 +319,18 @@ function App() {
                 type="date"
                 value={selectedDate}
                 onChange={handleDateChange}
-                className={`h-full w-full rounded-lg ${
+                className={`h-full w-full rounded-md px-3 ${
                   darkMode ? "bg-gray-500 text-white" : ""
                 }`}
               />
             </div>
             <div
-              className={` h-full w-full rounded-lg flex items-center justify-around ${
+              className={` h-full w-full rounded-md flex items-center justify-around ${
                 darkMode ? "bg-gray-500 text-white" : "bg-white"
               }`}
             >
               <button>
-                <SlCalender
+                <RiCalendarScheduleFill
                   size={24}
                   onClick={() => {
                     if (selectedTimeZones.length > 0) {
@@ -329,20 +346,20 @@ function App() {
                 />
               </button>
               <button onClick={handleSort}>
-                <PiArrowsDownUpBold size={24} />
+                <RiArrowUpDownFill size={24} />
               </button>
               <button onClick={handleLuLinkClick}>
                 <LuLink size={24} />
               </button>
               <button onClick={toggleDarkMode}>
-                <MdNightlight size={24} />
+                <MdDarkMode size={24} />
               </button>
             </div>
           </div>
           <div
             className={`${
               darkMode ? "bg-gray-700" : "bg-blue-400"
-            } h-5/6 w-full rounded-b-2xl p-5 overflow-hidden`}
+            } h-5/6 w-full rounded-b-lg p-5 overflow-hidden`}
           >
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="droppable">
@@ -350,7 +367,7 @@ function App() {
                   <div
                     className={`${
                       darkMode ? "bg-gray-600" : "bg-white"
-                    } h-full w-full rounded-xl shadow-lg p-5 overflow-y-auto max-h-[350px]`}
+                    } h-full w-full rounded-md shadow-lg p-5 overflow-y-auto max-h-[350px]`}
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                   >
@@ -367,11 +384,11 @@ function App() {
                               {...provided.draggableProps}
                               className={`${
                                 darkMode ? "bg-gray-600" : "bg-white"
-                              } h-auto w-full p-3 mb-4 rounded-lg flex items-center shadow-md`}
+                              } h-auto w-full p-3 mb-4 rounded-md flex items-center shadow-md`}
                             >
                               <div
                                 {...provided.dragHandleProps}
-                                className="flex items-center justify-center cursor-grab"
+                                className="flex items-center justify-center cursor-grab pr-3"
                                 style={{
                                   width: "20px",
                                   height: "100%",
@@ -381,26 +398,28 @@ function App() {
                                 }}
                               >
                                 <div className="flex flex-col items-center mr-[2px]">
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
                                 </div>
                                 <div className="flex flex-col items-center mr-[2px]">
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
-                                  <div className="w-1 h-1 bg-gray-400 mb-1"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
+                                  <div className="w-1 h-1 bg-gray-400 mb-1 rounded-sm"></div>
                                 </div>
                               </div>
                               <div className="flex-1">
@@ -408,7 +427,7 @@ function App() {
                                   <h3
                                     className={`${
                                       darkMode ? "bg-gray-600" : "bg-white"
-                                    }font-bold text-lg`}
+                                    } font-bold text-lg mb-1`}
                                   >
                                     {item.tz}
                                   </h3>
